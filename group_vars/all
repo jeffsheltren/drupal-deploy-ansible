@@ -1,0 +1,33 @@
+# Variable defaults for all hosts.
+
+git_url: "git@github.com:path/to/app/repo.git"
+drush_path: "/usr/bin/drush"
+# Whichever user you ssh as should have sudo access to run drush commands as the web user.
+web_user: "apache"
+
+app_name: "foo"
+app_base_path: "/var/www/{{ app_name }}"
+# Releases directory is where target release tags are deployed.
+app_releases_path: "{{ app_base_path }}/releases"
+web_docroot_symlink: "{{ app_base_path }}/current"
+# The web docroot symlink will be created to point to this directory within the target release (i.e. "current -> releases/<tag>/docroot")
+web_docroot_target_dir: "docroot"
+# For creating the files/ symlink, we use the path docroot/sites/{{ drupal_site_name }}/files.
+drupal_site_name: "default"
+db_snapshot_path: "/mnt/drupal-files/db_snapshots"
+
+# Symlink Drupal local settings for the given environment.
+symlink_drupal_local_settings: true
+drupal_local_settings_instances_path: "instances"
+drupal_local_settings_filename: "settings.local.php"
+
+# Files are generally symlinked to a shared mount.
+symlink_drupal_files: true
+drupal_files_path: "/mnt/drupal-files/files"
+
+# Default to running drush updb and drush cc all after a code deploy.
+drupal_updb: true
+drupal_cc_all: true
+
+# Run a DB snapshot after deploy. Default is no, but this is overridden for prod environments.
+db_snapshot: false

@@ -1,0 +1,4 @@
+# Defaults for production web hosts.
+
+# Prod hosts run a DB snapshot before deploying.
+db_snapshot: true

@@ -1,0 +1,60 @@
+- hosts: all
+  any_errors_fatal: true
+
+  tasks:
+    - name: "Check if target release exists"
+      stat:
+        path: "{{ app_releases_path }}/{{ deploy_tag }}"
+        register: targetreleasecheck
+
+    - name: "Stop deploy if target release exists"
+      fail:
+        msg: "Target release already exists, exiting"
+      when: targetreleasecheck.stat.exists
+
+    - name: "Create database snapshot"
+      command: "{{ drush_path }} @{{ app_name }}.{{ deploy_env }} sql-dump --gzip --result-file={{ db_snapshot_path }}/{{ app_name }}-{{ deploy_env }}-{{ ansible_date_time.iso8601_basic_short }}.sql.gz"
+      when:
+        - "'db-snapshot' in group_names"
+        - db_snapshot
+
+    - name: "Clone git repo and checkout target tag"
+      git:
+        repo: "{{ git_url }}"
+        dest: "{{ app_releases_path }}/{{ deploy_tag }}"
+        version: "{{ deploy_tag }}"
+        accept_hostkey: yes
+
+    - name: "Symlink Drupal files directory"
+      file:
+        src: "{{ drupal_files_path }}"
+        dest: "{{ app_releases_path }}/{{ deploy_tag }}/{{ web_docroot_target_dir }}/sites/{{ drupal_site_name }}/files"
+        state: link
+      when: symlink_drupal_files
+
+    - name: "Symlink Drupal settings for this environment"
+      file:
+        src: "{{ drupal_local_settings_instances_path }}/{{ deploy_env }}/settings.local.php"
+        dest: "{{ app_releases_path }}/{{ deploy_tag }}/{{ web_docroot_target_dir }}/sites/{{ drupal_site_name }}/settings.local.php"
+        state: link
+
+    - name: "Update webroot docroot symlink to point to new release"
+      file:
+        src: "{{ app_releases_path }}/{{ deploy_tag }}/{{ web_docroot_target_dir }}"
+        dest: "{{ web_docroot_symlink }}"
+        state: link
+        force: yes
+
+    - name: "Run database schema updates"
+      command: "{{ drush_path }} @{{ app_name }}.{{ deploy_env }} updb -y"
+      run_once: true
+      when: drupal_updb
+      become: true
+      become_user: "{{ web_user }}
+
+    - name: "Clear all Drupal caches"
+      command: "{{ drush_path }} @{{ app_name }}.{{ deploy_env }} cc all"
+      run_once: true
+      when: drupal_cc_all
+      become: true
+      become_user: "{{ web_user }}
