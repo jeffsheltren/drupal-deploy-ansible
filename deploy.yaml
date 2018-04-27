@@ -37,6 +37,7 @@
         src: "{{ drupal_local_settings_instances_path }}/{{ deploy_env }}/settings.local.php"
         dest: "{{ app_releases_path }}/{{ deploy_tag }}/{{ web_docroot_target_dir }}/sites/{{ drupal_site_name }}/settings.local.php"
         state: "link"
+      when: symlink_drupal_local_settings
 
     - name: "Update webroot docroot symlink to point to new release"
       file:
