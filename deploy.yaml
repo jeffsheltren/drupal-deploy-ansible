@@ -36,25 +36,25 @@
       file:
         src: "{{ drupal_local_settings_instances_path }}/{{ deploy_env }}/settings.local.php"
         dest: "{{ app_releases_path }}/{{ deploy_tag }}/{{ web_docroot_target_dir }}/sites/{{ drupal_site_name }}/settings.local.php"
-        state: link
+        state: "link"
 
     - name: "Update webroot docroot symlink to point to new release"
       file:
         src: "{{ app_releases_path }}/{{ deploy_tag }}/{{ web_docroot_target_dir }}"
         dest: "{{ web_docroot_symlink }}"
-        state: link
-        force: yes
+        state: "link"
+        force: "yes"
 
     - name: "Run database schema updates"
       command: "{{ drush_path }} @{{ app_name }}.{{ deploy_env }} updb -y"
       run_once: true
       when: drupal_updb
       become: true
-      become_user: "{{ web_user }}
+      become_user: "{{ web_user }}"
 
     - name: "Clear all Drupal caches"
       command: "{{ drush_path }} @{{ app_name }}.{{ deploy_env }} cc all"
       run_once: true
       when: drupal_cc_all
       become: true
-      become_user: "{{ web_user }}
+      become_user: "{{ web_user }}"
