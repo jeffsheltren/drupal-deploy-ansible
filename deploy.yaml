@@ -5,7 +5,7 @@
     - name: "Check if target release exists"
       stat:
         path: "{{ app_releases_path }}/{{ deploy_tag }}"
-        register: targetreleasecheck
+      register: targetreleasecheck
 
     - name: "Stop deploy if target release exists"
       fail:
@@ -47,15 +47,11 @@
         force: "yes"
 
     - name: "Run database schema updates"
-      command: "{{ drush_path }} @{{ app_name }}.{{ deploy_env }} updb -y"
+      command: "sudo -u {{ web_user }} {{ drush_path }} @{{ app_name }}.{{ deploy_env }} updb -y"
       run_once: true
       when: drupal_updb
-      become: true
-      become_user: "{{ web_user }}"
 
     - name: "Clear all Drupal caches"
-      command: "{{ drush_path }} @{{ app_name }}.{{ deploy_env }} cc all"
+      command: "sudo -u {{ web_user }} {{ drush_path }} @{{ app_name }}.{{ deploy_env }} cc all"
       run_once: true
       when: drupal_cc_all
-      become: true
-      become_user: "{{ web_user }}"
