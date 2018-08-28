@@ -58,4 +58,6 @@
 
     - name: "Clean up old releases when specified"
       shell: "ls -dt1 {{ app_releases_path }}/* | tail -n +{{ releases_to_keep | int + 1 }} | xargs rm -fr"
-      when: clean_old_releases
+      when:
+        - clean_old_releases
+        - releases_to_keep > 1
