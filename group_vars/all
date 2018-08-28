@@ -31,3 +31,8 @@ drupal_cc_all: true
 
 # Run a DB snapshot after deploy. Default is no, but this is overridden for prod environments.
 db_snapshot: false
+
+# Doesn't clean up old releases by default. Set to true to enable,
+# and configure releases_to_keep to the number of releases to keep.
+clean_old_releases: false
+releases_to_keep: 10
